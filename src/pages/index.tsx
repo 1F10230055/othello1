@@ -1,59 +1,75 @@
+import { useState } from 'react';
 import styles from './index.module.css';
-
 const Home = () => {
+  const [board, setBoard] = useState([
+    [0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 1, 2, 0, 0, 0],
+    [0, 0, 0, 2, 1, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0],
+  ]);
+  const direction = [
+    [0, 1],
+    [1, 1],
+    [1, 0],
+    [1, -1],
+    [0, -1],
+    [-1, -1],
+    [-1, 0],
+    [-1, 1],
+  ];
+  const [turnColor, setTurnColor] = useState(2);
+  const newBoard: number[][] = JSON.parse(JSON.stringify(board));
+  const clickcell = (x: number, y: number) => {
+    if (newBoard[y][x] === 0) {
+      for (const d of direction)
+        if (
+          0 < x + d[1] &&
+          x + d[1] < 7 &&
+          0 < y + d[0] &&
+          y + d[0] < 7 &&
+          newBoard[y + d[0]][x + d[1]] === 3 - turnColor
+        ) {
+          for (let distance = 2; distance < 8; distance += 1) {
+            if (0 > y + d[0] * distance || y + d[1] * distance > 7) {
+              break;
+            } else if (newBoard[y + d[0] * distance][x + d[1] * distance] === 0) {
+              break;
+            } else if (newBoard[y + d[0] * distance][x + d[1] * distance] === 3 - turnColor) {
+              continue;
+            } else if (newBoard[y + d[0] * distance][x + d[1] * distance] === turnColor) {
+              for (let dis = distance - 1; dis >= 0; dis -= 1) {
+                newBoard[y + d[0] * dis][x + d[1] * dis] = turnColor;
+              }
+              break;
+            }
+          }
+        }
+      setTurnColor(-turnColor + 3);
+      setBoard(newBoard);
+    }
+  };
   return (
     <div className={styles.container}>
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
-
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code} style={{ backgroundColor: '#fafafa' }}>
-            pages/index.js
-          </code>
-        </p>
-
-        <div className={styles.grid}>
-          <a className={styles.card} href="https://nextjs.org/docs">
-            <h2>Documentation &rarr;</h2>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a className={styles.card} href="https://nextjs.org/learn">
-            <h2>Learn &rarr;</h2>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a className={styles.card} href="https://github.com/vercel/next.js/tree/master/examples">
-            <h2>Examples &rarr;</h2>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            className={styles.card}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          >
-            <h2>Deploy &rarr;</h2>
-            <p>Instantly deploy your Next.js site to a public URL with Vercel.</p>
-          </a>
-        </div>
-      </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <span className={styles.logo}>
-            <img src="vercel.svg" alt="Vercel Logo" width={72} height={16} />
-          </span>
-        </a>
-      </footer>
+      <div className={styles.board}>
+        {board.map((row, y) =>
+          row.map((cell, x) => (
+            <div className={styles.cell} key={'$(x)-$(y)'} onClick={() => clickcell(x, y)}>
+              {cell !== 0 && (
+                <div
+                  className={styles.stone}
+                  style={{ background: cell === 2 ? '#fff' : '#000' }}
+                />
+              )}
+            </div>
+          ))
+        )}
+      </div>
+      <div>{`${turnColor === 1 ? '黒の番' : '白の番'}`}</div>
     </div>
   );
 };
-
 export default Home;
