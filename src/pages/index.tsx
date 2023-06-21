@@ -25,7 +25,9 @@ const Home = () => {
   const newBoard: number[][] = JSON.parse(JSON.stringify(board));
   const clickcell = (x: number, y: number) => {
     if (newBoard[y][x] === 0) {
-      for (const d of direction)
+      let isFlipped = false; // 石が反転したかどうかを示すフラグ
+
+      for (const d of direction) {
         if (
           0 < x + d[1] &&
           x + d[1] < 7 &&
@@ -34,13 +36,18 @@ const Home = () => {
           newBoard[y + d[0]][x + d[1]] === 3 - turnColor
         ) {
           for (let distance = 2; distance < 8; distance += 1) {
-            if (0 > y + d[0] * distance || y + d[1] * distance > 7) {
-              break;
-            } else if (newBoard[y + d[0] * distance][x + d[1] * distance] === 0) {
+            if (
+              0 > y + d[0] * distance ||
+              y + d[1] * distance > 7 ||
+              newBoard[y + d[0] * distance][x + d[1] * distance] === 0
+            ) {
               break;
             } else if (newBoard[y + d[0] * distance][x + d[1] * distance] === 3 - turnColor) {
               continue;
             } else if (newBoard[y + d[0] * distance][x + d[1] * distance] === turnColor) {
+              // 石の反転が行われた場合にフラグを立てる
+              isFlipped = true;
+
               for (let dis = distance - 1; dis >= 0; dis -= 1) {
                 newBoard[y + d[0] * dis][x + d[1] * dis] = turnColor;
               }
@@ -48,8 +55,12 @@ const Home = () => {
             }
           }
         }
-      setTurnColor(-turnColor + 3);
-      setBoard(newBoard);
+      }
+
+      if (isFlipped) {
+        setTurnColor(-turnColor + 3);
+        setBoard(newBoard);
+      }
     }
   };
   return (
